@@ -2,12 +2,6 @@
 <openerp>
     <data noupdate="1">
 
-        <!-- Sequences for sale.order -->
-        <record id="seq_type_picking_dispatch" model="ir.sequence.type">
-            <field name="name">Picking Dispatch</field>
-            <field name="code">picking.dispatch</field>
-        </record>
-
         <record id="seq_picking_dispatch" model="ir.sequence">
             <field name="name">Picking Dispatch</field>
             <field name="code">picking.dispatch</field>
@@ -18,4 +12,3 @@
 
     </data>
 </openerp>
-

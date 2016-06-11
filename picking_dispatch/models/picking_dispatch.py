@@ -1,28 +1,11 @@
 # -*- coding: utf-8 -*-
-##############################################################################
-#
-#    Author: Alexandre Fayolle
-#    Copyright 2012-2014 Camptocamp SA
-#
-#    This program is free software: you can redistribute it and/or modify
-#    it under the terms of the GNU Affero General Public License as
-#    published by the Free Software Foundation, either version 3 of the
-#    License, or (at your option) any later version.
-#
-#    This program is distributed in the hope that it will be useful,
-#    but WITHOUT ANY WARRANTY; without even the implied warranty of
-#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-#    GNU Affero General Public License for more details.
-#
-#    You should have received a copy of the GNU Affero General Public License
-#    along with this program.  If not, see <http://www.gnu.org/licenses/>.
-#
-##############################################################################
+# Copyright 2012-2014 Camptocamp SA
+# License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl.html).
+
 import logging
 from datetime import datetime
-from openerp import models, fields, api
-from openerp.osv.osv import except_osv
-from openerp.tools.translate import _
+from openerp import models, fields, api, _
+from openerp.exceptions import ValidationError
 
 _logger = logging.getLogger(__name__)
 
@@ -41,8 +24,63 @@ class PickingDispatch(models.Model):
     _name = 'picking.dispatch'
     _description = "Dispatch Picking Order"
 
+    name = fields.Char(
+        'Name',
+        required=True, select=True,
+        copy=False, unique=True,
+        states={'draft': [('readonly', False)]},
+        default=lambda self: self.env['ir.sequence'].get('picking.dispatch'),
+        help='Name of the picking dispatch')
+    date = fields.Date(
+        'Date',
+        required=True, readonly=True, select=True,
+        states={'draft': [('readonly', False)],
+                'assigned': [('readonly', False)]},
+        default=fields.Date.context_today,
+        help='Date on which the picking dispatched is to be processed')
+    picker_id = fields.Many2one(
+        'res.users', 'Picker',
+        readonly=True, select=True,
+        states={'draft': [('readonly', False)],
+                'assigned': [('readonly', False),
+                             ('required', True)]},
+        help='The user to which the pickings are assigned')
+    move_ids = fields.One2many(
+        'stock.move', 'dispatch_id', 'Moves',
+        readonly=True, copy=False,
+        states={'draft': [('readonly', False)]},
+        help='The list of moves to be processed')
+    notes = fields.Text('Notes', help='free form remarks')
+    backorder_id = fields.Many2one(
+        'picking.dispatch', 'Back Order of',
+        help='If this dispatch was split, this links to the dispatch '
+        'order containing the other part which was processed',
+        select=True)
+    state = fields.Selection(
+        [
+            ('draft', 'Draft'),
+            ('assigned', 'Assigned'),
+            ('progress', 'In Progress'),
+            ('done', 'Done'),
+            ('cancel', 'Cancelled'),
+        ], 'Dispatch State',
+        readonly=True, select=True, copy=False,
+        default='draft',
+        help='The state of the picking. '
+        'Workflow is draft -> assigned -> progress -> done or cancel')
+    related_picking_ids = fields.One2many(
+        'stock.picking',
+        readonly=True,
+        string='Related Dispatch Picking',
+        compute='_compute_related_picking')
+    company_id = fields.Many2one(
+        'res.company', 'Company',
+        required=True,
+        default=lambda s: s._default_company(),
+    )
+
     @api.multi
-    def _get_related_picking(self):
+    def _compute_related_picking(self):
         if not self.ids:
             return
 
@@ -67,71 +105,14 @@ class PickingDispatch(models.Model):
         company_obj = self.env['res.company']
         return company_obj._company_default_get('picking.dispatch')
 
-    name = fields.Char(
-        'Name',
-        required=True, select=True,
-        copy=False, unique=True,
-        states={'draft': [('readonly', False)]},
-        default=lambda self: self.env['ir.sequence'].get('picking.dispatch'),
-        help='Name of the picking dispatch')
-    date = fields.Date(
-        'Date',
-        required=True, readonly=True, select=True,
-        states={'draft': [('readonly', False)],
-                'assigned': [('readonly', False)]},
-        default=fields.Date.context_today,
-        help='date on which the picking dispatched is to be processed')
-    picker_id = fields.Many2one(
-        'res.users', 'Picker',
-        readonly=True, select=True,
-        states={'draft': [('readonly', False)],
-                'assigned': [('readonly', False),
-                             ('required', True)]},
-        help='the user to which the pickings are assigned')
-    move_ids = fields.One2many(
-        'stock.move', 'dispatch_id', 'Moves',
-        readonly=True, copy=False,
-        states={'draft': [('readonly', False)]},
-        help='the list of moves to be processed')
-    notes = fields.Text('Notes', help='free form remarks')
-    backorder_id = fields.Many2one(
-        'picking.dispatch', 'Back Order of',
-        help='if this dispatch was split, this links to the dispatch '
-        'order containing the other part which was processed',
-        select=True)
-    state = fields.Selection(
-        [
-            ('draft', 'Draft'),
-            ('assigned', 'Assigned'),
-            ('progress', 'In Progress'),
-            ('done', 'Done'),
-            ('cancel', 'Cancelled'),
-        ], 'Dispatch State',
-        readonly=True, select=True, copy=False,
-        default='draft',
-        help='the state of the picking. '
-        'Workflow is draft -> assigned -> progress -> done or cancel')
-    related_picking_ids = fields.One2many(
-        'stock.picking',
-        readonly=True,
-        string='Related Dispatch Picking',
-        compute='_get_related_picking')
-    company_id = fields.Many2one(
-        'res.company', 'Company',
-        required=True,
-        default=_default_company)
-
     @api.multi
+    @api.constrains('picker_id')
     def _check_picker_assigned(self):
         for dispatch in self:
             if (dispatch.state in ('assigned', 'progress', 'done') and
                     not dispatch.picker_id):
-                return False
+                raise ValidationError(_('Please select a picker.'))
         return True
-
-    _constraints = [
-        (_check_picker_assigned, 'Please select a picker.', ['picker_id'])
-    ]
 
     @api.multi
     def action_assign(self):
@@ -181,16 +162,16 @@ class PickingDispatch(models.Model):
         for obj in self:
             date = datetime.strptime(obj.date, '%Y-%m-%d').date()
             if now < date:
-                raise except_osv(
-                    _('Error'),
-                    _('This dispatch cannot be processed until %s') % obj.date)
+                raise ValidationError(
+                    _('This dispatch cannot be processed until %s') % obj.date
+                )
 
-    def action_assign_moves(self, cr, uid, ids, context=None):
-        move_obj = self.pool['stock.move']
-        move_ids = move_obj.search(cr, uid,
-                                   [('dispatch_id', 'in', ids)],
-                                   context=context)
-        move_obj.action_assign(cr, uid, move_ids)
+    @api.multi
+    def action_assign_moves(self, context=None):
+        move_ids = self.env['stock.move'].search([
+            ('dispatch_id', 'in', [r.id for r in self])
+        ])
+        move_ids.action_assign()
         return True
 
     @api.multi

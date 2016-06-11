@@ -1,7 +1,9 @@
 .. image:: https://img.shields.io/badge/licence-AGPL--3-blue.svg
-    :alt: License: AGPL-3
+   :target: http://www.gnu.org/licenses/agpl-3.0-standalone.html
+   :alt: License: AGPL-3
 
-Picking dispatch
+================
+Picking Dispatch
 ================
 
 This module allows you to group various pickings into a dispatch order (picking wave),
@@ -27,6 +29,12 @@ From there, you can perform various operations:
  * Make partial delivery
  * Print a report to pick the proper goods at once
 
+Usage
+=====
+
+.. image:: https://odoo-community.org/website/image/ir.attachment/5784_f2813bd/datas
+   :alt: Try me on Runbot
+   :target: https://runbot.odoo-community.org/runbot/154/9.0
 
 Bug Tracker
 ===========
@@ -43,6 +51,7 @@ Credits
 Contributors
 ------------
 
+* Dave Lasley <dave@laslabs.com>
 * Peter Langenberg <peter.langenberg@bubbles-it.be>
 * Rudolf Schnapka <rs@techno-flex.de>
 * Matthieu Dietrich <matthieu.dietrich@camptocamp.com>
