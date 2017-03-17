@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
-# Copyright 2016 LasLabs Inc.
+# Copyright 2016-2017 LasLabs Inc.
 # License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl.html).
 
-from openerp.tests.common import TransactionCase
+from odoo.tests.common import TransactionCase
 
 
 class TestHelper(TransactionCase):
@@ -17,11 +17,11 @@ class TestHelper(TransactionCase):
         })
         self.partner_id = self.env['res.partner'].create({'name': 'Carrier'})
         self.service_id = self.env['delivery.carrier'].create({
-            'partner_id': self.partner_id.id,
             'name': 'Test Method',
         })
         self.rate = 1.23
         self.rate_vals = {
+            'partner_id': self.partner_id.id,
             'picking_id': self.picking_id.id,
             'service_id': self.service_id.id,
             'rate_currency_id': self.env.ref('base.USD').id,
