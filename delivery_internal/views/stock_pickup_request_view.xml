@@ -19,10 +19,10 @@
                             <field name="picking_id" />
                         </group>
                         <group>
-                            <field name="in_picking" readonly="True" />
-                            <field name="out_picking" readonly="True" />
-                            <field name="cash_in_picking" readonly="True" />
-                            <field name="cash_in_picking" readonly="True"  />
+                            <field name="in_picking_id" readonly="True" />
+                            <field name="out_picking_id" readonly="True" />
+                            <field name="cash_in_picking_id" readonly="True" />
+                            <field name="cash_in_picking_id" readonly="True"  />
                         </group>
                     </group>
                 </sheet>

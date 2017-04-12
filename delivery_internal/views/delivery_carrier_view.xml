@@ -11,13 +11,13 @@
         <field name="inherit_id" ref="delivery.view_delivery_carrier_form"/>
         <field name="arch" type="xml">
             <xpath expr="//div[@name='title']/group/group" position="inside">
-                <field name="internal_delivery_company"
+                <field name="internal_delivery_company_id"
                        attrs="{'invisible': [('delivery_type', '!=', 'internal')],
                                'required': [('delivery_type', '=', 'internal')]}" />
-                <field name="internal_delivery_stock_picking_type"
+                <field name="internal_delivery_stock_picking_type_id"
                        attrs="{'invisible': [('delivery_type', '!=', 'internal')],
                                'required': [('delivery_type', '=', 'internal')]}" />
-                <field name="internal_delivery_money_picking_type"
+                <field name="internal_delivery_money_picking_type_id"
                        attrs="{'invisible': [('delivery_type', '!=', 'internal')],
                                'required': [('delivery_type', '=', 'internal')]}" />
             </xpath>

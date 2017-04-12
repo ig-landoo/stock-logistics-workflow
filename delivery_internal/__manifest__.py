@@ -19,5 +19,7 @@
     "data": [
         "data/stock_pickup_request.xml",
         "views/delivery_carrier_view.xml",
+        "views/stock_pickup_request_view.xml",
+        "security/ir.model.access.csv",
     ],
 }

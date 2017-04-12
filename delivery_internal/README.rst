@@ -10,7 +10,7 @@ This module adds the concept of an internal delivery carrier to `delivery
 .carrier`. When the `delivery_type` of a carrier is set to `Internal`, any
 pickings shipped from that carrier will create `Requests For Pickup`. These
 requests for pickup will in-turn create two pickings, one for the carrier to
- pick up and one for the buyer to receive.
+pick up and one for the buyer to receive.
 
 The Requests for pickup can also be configured to allow for Cash On
 Delivery. Choosing this method will create two more pickings for the cash

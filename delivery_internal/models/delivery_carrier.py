@@ -13,15 +13,15 @@ class DeliveryCarrier(models.Model):
             ('internal', 'Internal'),
         ],
     )
-    internal_delivery_company = fields.Many2one(
+    internal_delivery_company_id = fields.Many2one(
         string='Delivery Company',
         comodel_name='res.company',
     )
-    internal_delivery_stock_picking_type = fields.Many2one(
+    internal_delivery_stock_picking_type_id = fields.Many2one(
         string='Delivery Stock Picking Type',
         comodel_name='stock.picking.type',
     )
-    internal_delivery_money_picking_type = fields.Many2one(
+    internal_delivery_money_picking_type_id = fields.Many2one(
         string='Delivery Money Picking Type',
         comodel_name='stock.picking.type',
     )

@@ -7,34 +7,31 @@ from .common import TestCommon
 
 class TestStockPickupRequest(TestCommon):
 
-    def test_creates_pickings_on_create(self):
-        """ It should create two pickings on create """
-        obj = self.env['stock.pickup.request'].create({
-            'company_id': self.service_id.internal_delivery_company.id,
+    def _new_record(self):
+        """ It creates a new `stock.pickup.request for testing """
+        return self.env['stock.pickup.request'].create({
+            'company_id': self.service_id.internal_delivery_company_id.id,
             'picking_id': self.picking_id.id,
         })
-        pickings = [obj.in_picking.id, obj.out_picking.id]
-        self.assertTrue(None not in pickings)
+
+    def test_creates_pickings_on_create(self):
+        """ It should create two pickings on create """
+        obj = self._new_record()
+        pickings = [obj.in_picking_id.id, obj.out_picking_id.id]
+        self.assertTrue(False not in pickings)
 
     def test_creates_cod_pickings(self):
         """ It should create pickings on CoD True"""
-        obj = self.env['stock.pickup.request'].create({
-            'company_id': self.service_id.internal_delivery_company.id,
-            'picking_id': self.picking_id.id,
-        })
+        obj = self._new_record()
         obj.cash_on_delivery = True
-        pickings = [obj.cash_in_picking.id, obj.cash_in_picking.id]
-        self.assertTrue(None not in pickings)
+        pickings = [obj.cash_in_picking_id.id, obj.cash_in_picking_id.id]
+        self.assertTrue(False not in pickings)
         self.assertEquals(
-            self.cash_out_picking.location_id.id ==
+            obj.cash_out_picking_id.location_id.id,
             self.picking_id.location_id.id
         )
 
     def test_compute_state_new(self):
         """ It should default to new """
-        obj = self.env['stock.pickup.request'].create({
-            'company_id': self.service_id.internal_delivery_company.id,
-            'picking_id': self.picking_id.id,
-        })
-        self.assertEquals(obj.state == 'new')
-
+        obj = self._new_record()
+        self.assertEquals(obj.state, 'new')
