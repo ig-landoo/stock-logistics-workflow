@@ -35,3 +35,11 @@ class TestStockPickupRequest(TestCommon):
         """ It should default to new """
         obj = self._new_record()
         self.assertEquals(obj.state, 'new')
+
+    def test_state_changes_with_pickings(self):
+        obj = self._new_record()
+        # Confirm the child pickings
+        obj.in_picking_id.action_confirm()
+        obj.out_picking_id.action_confirm()
+        obj._compute_state()
+        self.assertEquals(obj.state, 'confirmed')

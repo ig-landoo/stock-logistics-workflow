@@ -63,6 +63,24 @@ class StockPickupRequest(models.Model):
             'internal_delivery_%s_picking_type_id' % op_type
         )
 
+    def _create_move_lines(self, picking):
+        """ It will create move lines based on the given picking
+        Args:
+            picking (stock.picking): The picking to copy from
+        Returns:
+            list of stock.move objects
+        """
+        move_lines = []
+        for move_line in picking.move_lines:
+            move_lines.append([0, False, {
+                'name': move_line.name,
+                'product_id': move_line.product_id.id,
+                'product_uom': move_line.product_uom.id,
+                'product_uom_qty': move_line.product_uom_qty,
+                'state': 'draft',
+            }])
+        return move_lines
+
     @api.multi
     @api.depends('in_picking_id.state', 'in_picking_id.state')
     def _compute_state(self):
@@ -120,12 +138,14 @@ class StockPickupRequest(models.Model):
         picking = self.env['stock.picking'].browse(vals.get('picking_id'))
         company = self.env['res.company'].browse(vals.get('company_id'))
         pick_type = self._get_pick_type(picking, 'stock')
+        move_lines = self._create_move_lines(picking)
         in_picking_id = self.env['stock.picking'].create({
             'location_id': pick_type.default_location_src_id.id,
             'location_dest_id': picking.location_dest_id.id,
             'picking_type_id': pick_type.id,
             'partner_id': picking.partner_id.id,
             'move_type': 'one',
+            'move_lines': move_lines,
         })
         out_picking_id = self.env['stock.picking'].create({
             'location_id': picking.location_id.id,
@@ -133,6 +153,7 @@ class StockPickupRequest(models.Model):
             'picking_type_id': pick_type.id,
             'partner_id': company.partner_id.id,
             'move_type': 'one',
+            'move_lines': move_lines,
         })
         vals.update({
             'in_picking_id': in_picking_id.id,

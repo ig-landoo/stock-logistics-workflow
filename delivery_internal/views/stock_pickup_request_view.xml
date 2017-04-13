@@ -66,4 +66,11 @@
         <field name="view_id" ref="stock_pickup_request_view_tree" />
     </record>
 
+    <menuitem id="menu_stock_pickup_request"
+              parent="stock.menu_stock_inventory_control"
+              name="Stock Pickup Requests"
+              sequence="10"
+              action="stock_pickup_request_action"
+              groups="stock.group_stock_user" />
+
 </odoo>

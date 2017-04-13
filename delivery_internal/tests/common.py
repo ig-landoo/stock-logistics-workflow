@@ -14,11 +14,25 @@ class TestCommon(TransactionCase):
         self.picking_type = self.env['stock.picking.type'].search([])[0]
         self.picking_type.write({'default_location_src_id': location.id})
 
+        self.product = self.env.ref('product.product_delivery_02')
         self.picking_id = self.env['stock.picking'].create({
             'partner_id': self.partner_id.id,
             'location_dest_id': location.id,
             'location_id': location.id,
             'picking_type_id': self.picking_type.id,
+            'move_lines': [[0, False, {
+                'name': self.product.name,
+                'product_id': self.product.id,
+                'product_uom': self.product.uom_id.id,
+                'product_uom_qty': 1,
+                'state': 'draft',
+            }], [0, False, {
+                'name': self.product.name,
+                'product_id': self.product.id,
+                'product_uom': self.product.uom_id.id,
+                'product_uom_qty': 1,
+                'state': 'draft',
+            }]],
         })
         self.service_id = self.env['delivery.carrier'].create({
             'name': 'Test Method',
