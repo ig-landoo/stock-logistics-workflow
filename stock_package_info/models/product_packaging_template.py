@@ -91,10 +91,10 @@ class ProductPackagingTemplate(models.Model):
         names = []
         for rec in self:
             name = '%s [%s x %s x %s]' % (
-                self.packaging_template_name,
-                self.length,
-                self.width,
-                self.height,
+                rec.packaging_template_name,
+                rec.length,
+                rec.width,
+                rec.height,
             )
             names.append((rec.id, name))
         return names
